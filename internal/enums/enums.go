@@ -10,6 +10,7 @@ const (
 	Monitoring
 	Networks
 	Volumes
+	Projects
 )
 
 type ErrorType int

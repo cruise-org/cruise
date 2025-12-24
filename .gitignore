@@ -1,3 +1,4 @@
 cruise
+debug.log
 # Added by goreleaser init:
 dist/

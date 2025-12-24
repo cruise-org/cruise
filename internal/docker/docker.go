@@ -16,3 +16,7 @@ func init() {
 
 	cli = c
 }
+
+func GetClient() *client.Client {
+	return cli
+}

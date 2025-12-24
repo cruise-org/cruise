@@ -64,6 +64,15 @@ var NavText = `
  / /|  // /_/ / | |/ / 
 /_/ |_/ \__,_/  |___/  `
 
+var ProjectsText = `
+    ____                  _              __       
+   / __ \ _____ ____     (_)___   _____ / /_ _____
+  / /_/ // ___// __ \   / // _ \ / ___// __// ___/
+ / ____// /   / /_/ /  / //  __// /__ / /_ (__  ) 
+/_/    /_/    \____/__/ / \___/ \___/ \__//____/  
+                   /___/                          
+`
+
 func TextStyle() lipgloss.Style {
 	return lipgloss.NewStyle().Foreground(colors.Load().Text)
 }

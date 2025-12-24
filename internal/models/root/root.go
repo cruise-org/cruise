@@ -13,6 +13,7 @@ import (
 	msgpopup "github.com/NucleoFusion/cruise/internal/models/msg"
 	"github.com/NucleoFusion/cruise/internal/models/nav"
 	"github.com/NucleoFusion/cruise/internal/models/networks"
+	"github.com/NucleoFusion/cruise/internal/models/projects"
 	"github.com/NucleoFusion/cruise/internal/models/volumes"
 	"github.com/NucleoFusion/cruise/internal/models/vulnerability"
 	tea "github.com/charmbracelet/bubbletea"
@@ -37,6 +38,7 @@ type Root struct {
 	Monitoring    *monitoring.Monitoring
 	Networks      *networks.Networks
 	Volumes       *volumes.Volumes
+	Projects      *projects.Projects
 	ErrorPopup    *errorpopup.ErrorPopup
 	MsgPopup      *msgpopup.MsgPopup
 	Nav           *nav.Nav
@@ -48,15 +50,6 @@ func NewRoot() *Root {
 		CurrentPage:    enums.Home,
 		IsLoading:      true,
 		IsShowingError: false,
-		PageItems: map[string]enums.PageType{
-			"Home":          enums.Home,
-			"Containers":    enums.Containers,
-			"Images":        enums.Images,
-			"Vulnerability": enums.Vulnerability,
-			"Monitoring":    enums.Monitoring,
-			"Networks":      enums.Networks,
-			"Volumes":       enums.Volumes,
-		},
 	}
 }
 
@@ -87,6 +80,8 @@ func (s *Root) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			curr = s.Networks
 		case enums.Volumes:
 			curr = s.Volumes
+		case enums.Projects:
+			curr = s.Projects
 		}
 
 		s.Overlay = overlay.New(s.ErrorPopup, curr, overlay.Right, overlay.Top, 2, 2)
@@ -114,6 +109,8 @@ func (s *Root) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			curr = s.Networks
 		case enums.Volumes:
 			curr = s.Volumes
+		case enums.Projects:
+			curr = s.Projects
 		}
 
 		s.Overlay = overlay.New(s.MsgPopup, curr, overlay.Right, overlay.Top, 2, 2)
@@ -145,6 +142,8 @@ func (s *Root) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			cmd = s.Networks.Init()
 		case enums.Volumes:
 			cmd = s.Volumes.Init()
+		case enums.Projects:
+			cmd = s.Projects.Init()
 		}
 		return s, cmd
 	case tea.KeyMsg:
@@ -167,8 +166,9 @@ func (s *Root) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		s.Monitoring = monitoring.NewMonitoring(msg.Width, msg.Height)
 		s.Networks = networks.NewNetworks(msg.Width, msg.Height)
 		s.Volumes = volumes.NewVolumes(msg.Width, msg.Height)
+		s.Projects = projects.NewProjects(msg.Width, msg.Height)
 
-		cmd := tea.Batch(s.Home.Init(), s.Containers.Init(), s.Images.Init(), s.Monitoring.Init(), s.Networks.Init(), s.Volumes.Init())
+		cmd := s.Home.Init()
 
 		s.IsLoading = false
 		return s, cmd
@@ -209,6 +209,10 @@ func (s *Root) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		img, cmd := s.Volumes.Update(msg)
 		s.Volumes = img.(*volumes.Volumes)
 		return s, cmd
+	case enums.Projects:
+		img, cmd := s.Projects.Update(msg)
+		s.Projects = img.(*projects.Projects)
+		return s, cmd
 	}
 
 	return s, nil
@@ -242,6 +246,8 @@ func (s *Root) View() string {
 		return s.Networks.View()
 	case enums.Volumes:
 		return s.Volumes.View()
+	case enums.Projects:
+		return s.Projects.View()
 	}
 
 	return "Cruise - A TUI Docker Client"
