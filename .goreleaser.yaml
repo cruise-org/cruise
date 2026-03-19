@@ -65,8 +65,7 @@ aurs:
     maintainers:
       - "NucleoFusion <lakshit.singh.mail@gmail.com>"
     description: |-
-      Cruise is a powerful, intuitive, and fully-featured container management TUI (Terminal
-      User Interface)
+      Cruise is a powerful, intuitive, and fully-featured container management TUI 
     license: "Apache-2.0"
     private_key: "{{ .Env.AUR_KEY }}"
     git_url: "ssh://aur@aur.archlinux.org/cruise-bin.git"
