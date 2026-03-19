@@ -75,7 +75,7 @@ Please check out the roadmap [here](ROADMAP.md).
 
 ## Installation
 
-Refer to the installation docs [here](https://cruise-org.github.io/cruise/docs/install.html).
+Refer to the installation docs [here](https://cruise-org.github.io/install).
 
 ## Contributing
 
