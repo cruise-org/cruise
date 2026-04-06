@@ -26,6 +26,7 @@ func Default() Config {
 			ExportDir: expDir,
 			Term:      DetectTerminal(),
 			Runtimes:  []string{"docker"},
+			Registry:  []RegistryConfig{},
 		},
 		Keybinds: Keybinds{
 			Global: GlobalKeybinds{
@@ -45,6 +46,7 @@ func Default() Config {
 				Volumes:       "v",
 				Monitoring:    "m",
 				Vulnerability: "s",
+				Registry:      "r",
 			},
 			Fzf: FzfKeybinds{
 				Up:    "up",
@@ -92,6 +94,11 @@ func Default() Config {
 			Monitoring: MonitorKeybinds{
 				Search:     "/",
 				ExitSearch: "esc",
+			},
+			RegistryLogin: RegistryLoginKeybinds{
+				Left:  "ctrl+left",
+				Right: "ctrl+right",
+				Enter: "enter",
 			},
 		},
 		Styles: Styles{

@@ -19,6 +19,7 @@ type NavMap struct {
 	Volumes       key.Binding
 	Monitoring    key.Binding
 	Vulnerability key.Binding
+	Registry      key.Binding
 }
 
 func NewNavMap() NavMap {
@@ -55,6 +56,10 @@ func NewNavMap() NavMap {
 		Vulnerability: key.NewBinding(
 			key.WithKeys(m.Vulnerability),
 			key.WithHelp(m.Vulnerability, "vulnerability"),
+		),
+		Registry: key.NewBinding(
+			key.WithKeys(m.Registry),
+			key.WithHelp(m.Registry, "registry"),
 		),
 	}
 }

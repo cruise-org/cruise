@@ -8,10 +8,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/cruise-org/cruise/internal/utils"
 	"github.com/cruise-org/cruise/pkg/config"
-	"github.com/pelletier/go-toml/v2"
 	"github.com/spf13/cobra"
+	"go.yaml.in/yaml/v3"
 )
 
 var dumpPath string
@@ -24,7 +23,7 @@ var dumpCmd = &cobra.Command{
 		fmt.Println("Dumping config to:", path)
 
 		if filepath.Ext(path) == "" {
-			path = filepath.Join(path, "dump.toml")
+			path = filepath.Join(path, "dump.yaml") // changed
 		}
 
 		f, err := os.Create(path)
@@ -34,18 +33,19 @@ var dumpCmd = &cobra.Command{
 		}
 		defer f.Close()
 
-		encoder := toml.NewEncoder(f)
+		encoder := yaml.NewEncoder(f)
 		err = encoder.Encode(config.Default())
 		if err != nil {
 			fmt.Println("Failed to write to file: ", err.Error())
 			return
 		}
-
 		fmt.Println("Successfully Dumped file to " + path)
 	},
 }
 
 func init() {
-	dumpCmd.Flags().StringVarP(&dumpPath, "path", "p", filepath.Join(utils.GetCfgDir(), "dump.toml"), "filepath to dump the config")
+	dumpCmd.Flags().StringVarP(&dumpPath, "path", "p",
+		filepath.Join(config.GetCfgDir(), "dump.yaml"), // changed
+		"filepath to dump the config")
 	rootCmd.AddCommand(dumpCmd)
 }

@@ -6,11 +6,23 @@ package messages
 import (
 	"github.com/cruise-org/cruise/internal/data"
 	"github.com/cruise-org/cruise/pkg/enums"
+	"github.com/cruise-org/cruise/pkg/registry"
 	"github.com/cruise-org/cruise/pkg/types"
 	"github.com/docker/docker/api/types/events"
 )
 
 type (
+	// Registries
+	ParsedRegistries     struct{ Registries []*registry.Registry }
+	RegistryLoginMessage struct{ Registry *registry.Registry }
+	RegistryLoginError   struct{ Err error }
+	PendingRegistryLogin struct{ Ch chan RegistryLoginMessage }
+	CloseLoginMessage    struct{}
+	IgnoreLoginMessage   struct{}
+	LoginMessage         struct {
+		Pass string
+	}
+
 	HomeStatContainer struct{ Containers *[]types.Container }
 	HomeStatImage     struct{ Images *[]types.Image }
 	HomeStatNetwork   struct{ Networks *[]types.Network }

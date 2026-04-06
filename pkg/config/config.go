@@ -7,16 +7,16 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 
-	"github.com/cruise-org/cruise/internal/utils"
 	"github.com/spf13/viper"
 )
 
 var Cfg Config
 
 func SetCfg() error {
-	cfg := utils.GetCfgDir()
-	p := filepath.Join(cfg, "config.toml")
+	cfg := GetCfgDir()
+	p := filepath.Join(cfg, "config.yaml")
 
 	if _, err := os.Stat(p); os.IsNotExist(err) {
 		if err := os.MkdirAll(cfg, 0o755); err != nil {
@@ -43,4 +43,18 @@ func SetCfg() error {
 	}
 
 	return nil
+}
+
+func GetCfgDir() string {
+	switch runtime.GOOS {
+	case "linux", "darwin":
+		home, _ := os.UserHomeDir()
+		return filepath.Join(home, ".config", "cruise")
+	case "windows":
+		home, _ := os.UserHomeDir()
+		return filepath.Join(home, ".cruise")
+	default:
+		cfg, _ := os.UserConfigDir()
+		return cfg
+	}
 }

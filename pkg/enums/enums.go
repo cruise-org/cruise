@@ -14,6 +14,7 @@ const (
 	Networks
 	Volumes
 	Nav
+	Registry
 )
 
 type ErrorType int

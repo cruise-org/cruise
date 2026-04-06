@@ -66,3 +66,13 @@ type Volume struct {
 	Mountpoint string
 	CreatedAt  string
 }
+
+type RegistryImage struct {
+	Domain      string `json:"domain"`
+	Provider    string `json:"provider"`
+	Name        string `json:"name"`
+	Project     string `json:"project"`
+	Description string `json:"description"`
+	IsPrivate   bool   `json:"is_private"`
+	PullCount   int64  `json:"pull_count"`
+}

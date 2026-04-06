@@ -5,9 +5,6 @@ package utils
 
 import (
 	"fmt"
-	"os"
-	"path/filepath"
-	"runtime"
 	"strings"
 	"time"
 
@@ -16,6 +13,73 @@ import (
 	"github.com/cruise-org/cruise/pkg/enums"
 	"github.com/docker/docker/api/types/container"
 )
+
+func DistributeWidth(w, parts int) []int {
+	if parts <= 0 {
+		return nil
+	}
+
+	base := w / parts
+	rem := w % parts
+
+	result := make([]int, parts)
+
+	// Fill with base width
+	for i := range result {
+		result[i] = base
+	}
+
+	// Distribute remainder centered
+	mid := parts / 2
+
+	if parts%2 == 1 {
+		// Odd → start exactly at center
+		left := mid
+		right := mid + 1
+
+		for rem > 0 {
+			result[left]++
+			rem--
+			if rem == 0 {
+				break
+			}
+
+			if right < parts {
+				result[right]++
+				rem--
+			}
+
+			left--
+			right++
+			if left < 0 {
+				left = 0
+			}
+		}
+	} else {
+		// Even → start from middle pair
+		left := mid - 1
+		right := mid
+
+		for rem > 0 {
+			if left >= 0 {
+				result[left]++
+				rem--
+			}
+			if rem == 0 {
+				break
+			}
+			if right < parts {
+				result[right]++
+				rem--
+			}
+
+			left--
+			right++
+		}
+	}
+
+	return result
+}
 
 func ReturnError(loc, title string, err error) tea.Cmd {
 	return func() tea.Msg {
@@ -167,20 +231,6 @@ func ToAnySlice[T any](in []T) []any {
 		out[i] = in[i]
 	}
 	return out
-}
-
-func GetCfgDir() string {
-	switch runtime.GOOS {
-	case "linux", "darwin":
-		home, _ := os.UserHomeDir()
-		return filepath.Join(home, ".config", "cruise")
-	case "windows":
-		home, _ := os.UserHomeDir()
-		return filepath.Join(home, ".cruise")
-	default:
-		cfg, _ := os.UserConfigDir()
-		return cfg
-	}
 }
 
 func GetSeverity(scanner, severity string) enums.Severity {

@@ -17,6 +17,7 @@ import (
 	msgpopup "github.com/cruise-org/cruise/internal/models/msg"
 	"github.com/cruise-org/cruise/internal/models/nav"
 	"github.com/cruise-org/cruise/internal/models/networks"
+	registrymodel "github.com/cruise-org/cruise/internal/models/registry"
 	"github.com/cruise-org/cruise/internal/models/volumes"
 	"github.com/cruise-org/cruise/internal/models/vulnerability"
 	"github.com/cruise-org/cruise/pkg/enums"
@@ -54,6 +55,7 @@ func NewRoot() *Root {
 			"Monitoring":    enums.Monitoring,
 			"Networks":      enums.Networks,
 			"Volumes":       enums.Volumes,
+			"Registry":      enums.Registry,
 		},
 	}
 }
@@ -116,10 +118,11 @@ func (s *Root) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			enums.Monitoring:    monitoring.NewMonitoring(w, h),
 			enums.Networks:      networks.NewNetworks(w, h),
 			enums.Volumes:       volumes.NewVolumes(w, h),
+			enums.Registry:      registrymodel.NewRegistryModel(w, h),
 		}
 
 		s.IsLoading = false
-		return s, tea.Batch()
+		return s, s.PageMap[s.CurrentPage].Init()
 	}
 
 	var cmd tea.Cmd
