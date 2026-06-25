@@ -8,7 +8,7 @@ require (
 	github.com/charmbracelet/lipgloss v1.1.1-0.20250404203927-76690c660834
 	github.com/docker/docker v28.3.3+incompatible
 	github.com/lithammer/fuzzysearch v1.1.8
-	github.com/pelletier/go-toml/v2 v2.2.4
+	github.com/pelletier/go-toml/v2 v2.4.2
 	github.com/rmhubbert/bubbletea-overlay v0.6.6
 	github.com/shirou/gopsutil/v3 v3.24.5
 	github.com/spf13/cobra v1.10.2
