@@ -13,7 +13,6 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/cruise-org/cruise/internal/messages"
-	"github.com/cruise-org/cruise/internal/utils"
 	"github.com/cruise-org/cruise/pkg/colors"
 	"github.com/cruise-org/cruise/pkg/config"
 	"github.com/cruise-org/cruise/pkg/runtimes"
@@ -59,7 +58,7 @@ func (s *NetworkList) Init() tea.Cmd {
 	return tea.Tick(0, func(_ time.Time) tea.Msg {
 		nets, err := runtimes.RuntimeSrv.Networks(context.Background())
 		if err != nil {
-			return utils.ReturnError("Networks Page", "Error Querying Networks", err)
+			return messages.ErrorMsg{Locn: "Networks Page", Title: "Error Querying Networks", Msg: err.Error()}
 		}
 		return messages.NetworksReadyMsg{Items: nets}
 	})

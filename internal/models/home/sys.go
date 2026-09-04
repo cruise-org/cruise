@@ -16,6 +16,11 @@ import (
 	"github.com/cruise-org/cruise/pkg/styles"
 )
 
+const (
+	barWidth        = 49
+	sysRefreshEvery = 2 * time.Second
+)
+
 type SysRes struct {
 	Width     int
 	Height    int
@@ -64,7 +69,7 @@ func (s *SysRes) Update(msg tea.Msg) (*SysRes, tea.Cmd) {
 		s.CPU = msg.CPU
 		s.Mem = msg.Mem
 		s.Disk = msg.Disk
-		return s, tea.Tick(200, refresh)
+		return s, tea.Tick(sysRefreshEvery, refresh)
 	}
 	return s, nil
 }
@@ -79,8 +84,19 @@ func (s *SysRes) View() string {
 			Render(s.FormattedView())))
 }
 
+func bar(usage float64) string {
+	filled := int((usage / 100) * float64(barWidth))
+	if filled < 0 {
+		filled = 0
+	}
+	if filled > barWidth {
+		filled = barWidth
+	}
+	return strings.Repeat("█", filled) + strings.Repeat(" ", barWidth-filled)
+}
+
 func (s SysRes) FormattedView() string {
-	if s.IsLoading {
+	if s.IsLoading || s.CPU == nil || s.Mem == nil || s.Disk == nil {
 		return "Querying System Data..."
 	}
 
@@ -88,9 +104,7 @@ func (s SysRes) FormattedView() string {
 	if s.CPU.Error != nil {
 		cputext = fmt.Sprintf("ERROR: %s", s.CPU.Error.Error())
 	} else {
-		cpufilled := int((s.CPU.Usage / 100) * float64(50))
-		cpubar := strings.Repeat("█", cpufilled) + strings.Repeat(" ", 50-cpufilled-1)
-		cputext = fmt.Sprintf("CPU:  [%s] %.1f%% | %.1fGhz - %dL/%dP Cores", cpubar, math.Round(s.CPU.Usage*10)/10, math.Round(s.CPU.Mhz/100)/10,
+		cputext = fmt.Sprintf("CPU:  [%s] %.1f%% | %.1fGhz - %dL/%dP Cores", bar(s.CPU.Usage), math.Round(s.CPU.Usage*10)/10, math.Round(s.CPU.Mhz/100)/10,
 			s.CPU.LogicCores, s.CPU.PhysicalCores)
 	}
 
@@ -98,41 +112,15 @@ func (s SysRes) FormattedView() string {
 	if s.Mem.Err != nil {
 		memtext = fmt.Sprintf("ERROR: %s", s.Mem.Err.Error())
 	} else {
-		memfilled := int((s.Mem.Usage / 100) * float64(50))
-		membar := strings.Repeat("█", memfilled) + strings.Repeat(" ", 50-memfilled-1)
-		memtext = fmt.Sprintf("Mem:  [%s] %.1f%% | %.1fGB / %.1fGB", membar, s.Mem.Usage, s.Mem.Used, s.Mem.Total)
+		memtext = fmt.Sprintf("Mem:  [%s] %.1f%% | %.1fGB / %.1fGB", bar(s.Mem.Usage), s.Mem.Usage, s.Mem.Used, s.Mem.Total)
 	}
 
 	disktext := ""
 	if s.Disk.Err != nil {
-		disktext = fmt.Sprintf("ERROR: %s", s.Mem.Err.Error())
+		disktext = fmt.Sprintf("ERROR: %s", s.Disk.Err.Error())
 	} else {
-		diskfilled := int((s.Disk.Usage / 100) * float64(50))
-		diskbar := strings.Repeat("█", diskfilled) + strings.Repeat(" ", 50-diskfilled-1)
-		disktext = fmt.Sprintf("Disk: [%s] %.1f%% | %.1fGB / %.1fGB", diskbar, s.Disk.Usage, s.Disk.Used, s.Disk.Total)
+		disktext = fmt.Sprintf("Disk: [%s] %.1f%% | %.1fGB / %.1fGB", bar(s.Disk.Usage), s.Disk.Usage, s.Disk.Used, s.Disk.Total)
 	}
 
 	return fmt.Sprintf("%s\n\n%s\n\n%s", cputext, memtext, disktext)
-}
-
-func (s *SysRes) Refresh() tea.Cmd {
-	return tea.Tick(0, func(t time.Time) tea.Msg {
-		cpuChan := make(chan *data.CPUInfo, 1)
-		memChan := make(chan *data.MemInfo, 1)
-		diskChan := make(chan *data.DiskInfo, 1)
-		go func() {
-			cpuChan <- data.GetCPUInfo()
-		}()
-		go func() {
-			memChan <- data.GetMemInfo()
-		}()
-		go func() {
-			diskChan <- data.GetDiskInfo()
-		}()
-		return messages.SysResReadyMsg{
-			CPU:  <-cpuChan,
-			Mem:  <-memChan,
-			Disk: <-diskChan,
-		}
-	})
 }

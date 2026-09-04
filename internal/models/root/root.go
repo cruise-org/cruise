@@ -4,7 +4,6 @@
 package root
 
 import (
-	"log"
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -55,13 +54,54 @@ func NewRoot() *Root {
 			"Networks":      enums.Networks,
 			"Volumes":       enums.Volumes,
 		},
+		PageMap: map[enums.PageType]page.Page{},
 	}
 }
 
 func (s *Root) Init() tea.Cmd { return nil }
 
+func (s *Root) newPage(pt enums.PageType) page.Page {
+	switch pt {
+	case enums.Nav:
+		return nav.NewNav(s.Width, s.Height)
+	case enums.Home:
+		return home.NewHome(s.Width, s.Height)
+	case enums.Containers:
+		return containers.NewContainers(s.Width, s.Height)
+	case enums.Images:
+		return images.NewImages(s.Width, s.Height)
+	case enums.Vulnerability:
+		return vulnerability.NewVulnerability(s.Width, s.Height)
+	case enums.Monitoring:
+		return monitoring.NewMonitoring(s.Width, s.Height)
+	case enums.Networks:
+		return networks.NewNetworks(s.Width, s.Height)
+	case enums.Volumes:
+		return volumes.NewVolumes(s.Width, s.Height)
+	default:
+		return home.NewHome(s.Width, s.Height)
+	}
+}
+
+// page returns the live instance for pt, creating it on first use.
+func (s *Root) page(pt enums.PageType) page.Page {
+	p, ok := s.PageMap[pt]
+	if !ok {
+		p = s.newPage(pt)
+		s.PageMap[pt] = p
+	}
+	return p
+}
+
+// resetPages tears down every live page so they get rebuilt fresh.
+func (s *Root) resetPages() {
+	for pt, p := range s.PageMap {
+		p.Cleanup()
+		delete(s.PageMap, pt)
+	}
+}
+
 func (s *Root) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	log.Printf("[ROOT MSG] %T\n", msg)
 	switch msg := msg.(type) {
 	case messages.CloseError:
 		s.IsShowingError = false
@@ -71,10 +111,7 @@ func (s *Root) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		s.IsShowingError = true
 		s.ErrorPopup = errorpopup.NewErrorPopup(s.Width, s.Height, msg.Msg, msg.Title, msg.Locn)
 
-		var curr page.Page
-		curr = s.PageMap[s.CurrentPage]
-
-		s.Overlay = overlay.New(s.ErrorPopup, curr, overlay.Right, overlay.Top, 2, 2)
+		s.Overlay = overlay.New(s.ErrorPopup, s.page(s.CurrentPage), overlay.Right, overlay.Top, 2, 2)
 		return s, tea.Tick(3*time.Second, func(_ time.Time) tea.Msg { return messages.CloseError{} })
 	case messages.CloseMsgPopup:
 		s.IsShowingMsg = false
@@ -84,15 +121,17 @@ func (s *Root) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		s.IsShowingMsg = true
 		s.MsgPopup = msgpopup.NewMsgPopup(s.Width, s.Height, msg.Msg, msg.Title, msg.Locn)
 
-		var curr page.Page
-		curr = s.PageMap[s.CurrentPage]
-
-		s.Overlay = overlay.New(s.MsgPopup, curr, overlay.Right, overlay.Top, 2, 2)
+		s.Overlay = overlay.New(s.MsgPopup, s.page(s.CurrentPage), overlay.Right, overlay.Top, 2, 2)
 		return s, tea.Tick(3*time.Second, func(_ time.Time) tea.Msg { return messages.CloseMsgPopup{} })
 	case messages.ChangePg:
-		s.CurrentPage = msg.Pg
-		cmd := s.PageMap[s.CurrentPage].Init()
-		return s, cmd
+		if msg.Pg != s.CurrentPage {
+			if old, ok := s.PageMap[s.CurrentPage]; ok {
+				old.Cleanup()
+				delete(s.PageMap, s.CurrentPage)
+			}
+			s.CurrentPage = msg.Pg
+		}
+		return s, s.page(s.CurrentPage).Init()
 	case tea.KeyMsg:
 		switch msg.Type {
 		case tea.KeyCtrlC:
@@ -101,29 +140,20 @@ func (s *Root) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return s, func() tea.Msg { return messages.ChangePg{Pg: enums.Nav} }
 		}
 	case tea.WindowSizeMsg:
+		resized := s.Width != msg.Width || s.Height != msg.Height
 		s.Width = msg.Width
 		s.Height = msg.Height
 
-		w := s.Width
-		h := s.Height
-
-		s.PageMap = map[enums.PageType]page.Page{
-			enums.Nav:           nav.NewNav(w, h),
-			enums.Home:          home.NewHome(w, h),
-			enums.Containers:    containers.NewContainers(w, h),
-			enums.Images:        images.NewImages(w, h),
-			enums.Vulnerability: vulnerability.NewVulnerability(w, h),
-			enums.Monitoring:    monitoring.NewMonitoring(w, h),
-			enums.Networks:      networks.NewNetworks(w, h),
-			enums.Volumes:       volumes.NewVolumes(w, h),
+		if resized {
+			s.resetPages()
 		}
 
 		s.IsLoading = false
-		return s, tea.Batch()
+		return s, s.page(s.CurrentPage).Init()
 	}
 
-	var cmd tea.Cmd
-	s.PageMap[s.CurrentPage], cmd = s.PageMap[s.CurrentPage].Update(msg)
+	updated, cmd := s.page(s.CurrentPage).Update(msg)
+	s.PageMap[s.CurrentPage] = updated
 
 	return s, cmd
 }
@@ -137,5 +167,5 @@ func (s *Root) View() string {
 		return s.Overlay.View()
 	}
 
-	return s.PageMap[s.CurrentPage].View()
+	return s.page(s.CurrentPage).View()
 }

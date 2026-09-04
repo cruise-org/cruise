@@ -8,7 +8,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"strings"
 	"time"
 
@@ -31,12 +30,10 @@ func NewContainerDetails(ctx context.Context, id string, cli *client.Client) *Co
 		return &s
 	}
 
-	startedAt, err := time.Parse(time.RFC3339Nano, insp.State.StartedAt)
-	if err != nil {
-		log.Fatal(err)
+	uptime := "-"
+	if startedAt, err := time.Parse(time.RFC3339Nano, insp.State.StartedAt); err == nil && !startedAt.IsZero() {
+		uptime = time.Since(startedAt).String()
 	}
-
-	uptime := time.Since(startedAt).String()
 
 	s.data = &map[string]string{
 		"ID":            s.ID,

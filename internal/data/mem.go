@@ -14,6 +14,9 @@ type MemInfo struct {
 
 func GetMemInfo() *MemInfo {
 	v, err := mem.VirtualMemory()
+	if err != nil {
+		return &MemInfo{Err: err}
+	}
 
 	totalGB := float64(v.Total) / (1 << 30)
 	usedGB := float64(v.Used) / (1 << 30)

@@ -14,7 +14,7 @@ import (
 )
 
 func (s *DockerRuntime) Containers(ctx context.Context) (*[]types.Container, error) {
-	dockerCtr, err := s.Client.ContainerList(context.Background(), container.ListOptions{All: true})
+	dockerCtr, err := s.Client.ContainerList(ctx, container.ListOptions{All: true})
 	if err != nil {
 		return nil, err
 	}
@@ -23,6 +23,11 @@ func (s *DockerRuntime) Containers(ctx context.Context) (*[]types.Container, err
 	cnt := make([]types.Container, 0, len(dockerCtr))
 	for _, v := range dockerCtr {
 		state := types.ContainerState(v.State)
+
+		name := ""
+		if len(v.Names) > 0 {
+			name = v.Names[0]
+		}
 
 		// asserting ports
 		ports := make([]types.ContainerPort, 0, len(v.Ports))
@@ -45,7 +50,7 @@ func (s *DockerRuntime) Containers(ctx context.Context) (*[]types.Container, err
 		}
 
 		cnt = append(cnt, types.Container{
-			Name:    v.Names[0],
+			Name:    name,
 			Runtime: "docker",
 			ID:      v.ID,
 			Image:   v.Image,
@@ -150,7 +155,7 @@ func (s *DockerRuntime) PortsMap(ctx context.Context, id string) ([]string, erro
 
 	res := map[string][]string{}
 	for _, cnt := range *conts {
-		inp, err := s.Client.ContainerInspect(context.Background(), cnt.ID)
+		inp, err := s.Client.ContainerInspect(ctx, cnt.ID)
 		if err != nil {
 			return nil, err
 		}

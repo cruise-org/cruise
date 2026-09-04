@@ -6,14 +6,12 @@ package images
 import (
 	"context"
 	"sort"
-	"time"
 
 	"github.com/charmbracelet/bubbles/textinput"
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/cruise-org/cruise/internal/messages"
-	"github.com/cruise-org/cruise/internal/utils"
 	"github.com/cruise-org/cruise/pkg/colors"
 	"github.com/cruise-org/cruise/pkg/config"
 	"github.com/cruise-org/cruise/pkg/runtimes"
@@ -58,19 +56,19 @@ func NewImageList(w int, h int) *ImageList {
 }
 
 func (s *ImageList) Init() tea.Cmd {
-	return tea.Tick(0, func(_ time.Time) tea.Msg {
+	return func() tea.Msg {
 		images, err := runtimes.RuntimeSrv.Images(context.Background())
+		if err != nil {
+			return messages.ErrorMsg{Locn: "Images Page", Title: "Error Querying Images", Msg: err.Error()}
+		}
 
-		m := make(map[string]types.Image)
+		m := make(map[string]types.Image, len(*images))
 		for _, v := range *images {
 			m[v.ID] = v
 		}
 
-		if err != nil {
-			return utils.ReturnError("Images Page", "Error Querying Images", err)
-		}
 		return messages.ImagesReadyMsg{Map: m}
-	})
+	}
 }
 
 func (s *ImageList) Update(msg tea.Msg) (*ImageList, tea.Cmd) {
