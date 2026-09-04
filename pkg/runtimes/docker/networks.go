@@ -12,7 +12,7 @@ import (
 )
 
 func (s *DockerRuntime) Networks(ctx context.Context) (*[]types.Network, error) {
-	dockerNet, err := s.Client.NetworkList(context.Background(), network.ListOptions{})
+	dockerNet, err := s.Client.NetworkList(ctx, network.ListOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -35,10 +35,10 @@ func (s *DockerRuntime) Networks(ctx context.Context) (*[]types.Network, error) 
 }
 
 func (s *DockerRuntime) PruneNetworks(ctx context.Context) error {
-	_, err := s.Client.NetworksPrune(context.Background(), filters.NewArgs())
+	_, err := s.Client.NetworksPrune(ctx, filters.NewArgs())
 	return err
 }
 
 func (s *DockerRuntime) RemoveNetwork(ctx context.Context, id string) error {
-	return s.Client.NetworkRemove(context.Background(), id)
+	return s.Client.NetworkRemove(ctx, id)
 }

@@ -6,6 +6,7 @@ package home
 import (
 	"context"
 	"fmt"
+	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -14,6 +15,8 @@ import (
 	"github.com/cruise-org/cruise/pkg/styles"
 	"github.com/cruise-org/cruise/pkg/types"
 )
+
+const statsQueryTimeout = 15 * time.Second
 
 type QuickStats struct {
 	Width      int
@@ -35,7 +38,9 @@ func getCmds() []tea.Cmd {
 	return []tea.Cmd{
 		// Containers
 		func() tea.Msg {
-			cnts, err := runtimes.RuntimeSrv.Containers(context.Background())
+			ctx, cancel := context.WithTimeout(context.Background(), statsQueryTimeout)
+			defer cancel()
+			cnts, err := runtimes.RuntimeSrv.Containers(ctx)
 			if err != nil {
 				return messages.ErrorMsg{Msg: err.Error()}
 			}
@@ -44,7 +49,9 @@ func getCmds() []tea.Cmd {
 
 		// Images
 		func() tea.Msg {
-			cnts, err := runtimes.RuntimeSrv.Images(context.Background())
+			ctx, cancel := context.WithTimeout(context.Background(), statsQueryTimeout)
+			defer cancel()
+			cnts, err := runtimes.RuntimeSrv.Images(ctx)
 			if err != nil {
 				return messages.ErrorMsg{Msg: err.Error()}
 			}
@@ -53,7 +60,9 @@ func getCmds() []tea.Cmd {
 
 		// Networks
 		func() tea.Msg {
-			cnts, err := runtimes.RuntimeSrv.Networks(context.Background())
+			ctx, cancel := context.WithTimeout(context.Background(), statsQueryTimeout)
+			defer cancel()
+			cnts, err := runtimes.RuntimeSrv.Networks(ctx)
 			if err != nil {
 				return messages.ErrorMsg{Msg: err.Error()}
 			}
@@ -62,7 +71,9 @@ func getCmds() []tea.Cmd {
 
 		// Volumes
 		func() tea.Msg {
-			cnts, err := runtimes.RuntimeSrv.Volumes(context.Background())
+			ctx, cancel := context.WithTimeout(context.Background(), statsQueryTimeout)
+			defer cancel()
+			cnts, err := runtimes.RuntimeSrv.Volumes(ctx)
 			if err != nil {
 				return messages.ErrorMsg{Msg: err.Error()}
 			}

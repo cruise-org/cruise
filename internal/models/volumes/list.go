@@ -5,7 +5,6 @@ package volumes
 
 import (
 	"context"
-	"fmt"
 	"sort"
 	"time"
 
@@ -14,7 +13,6 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/cruise-org/cruise/internal/messages"
-	"github.com/cruise-org/cruise/internal/utils"
 	"github.com/cruise-org/cruise/pkg/colors"
 	"github.com/cruise-org/cruise/pkg/config"
 	"github.com/cruise-org/cruise/pkg/runtimes"
@@ -60,8 +58,7 @@ func (s *VolumeList) Init() tea.Cmd {
 	return tea.Tick(0, func(_ time.Time) tea.Msg {
 		vols, err := runtimes.RuntimeSrv.Volumes(context.Background())
 		if err != nil {
-			fmt.Println(err)
-			return utils.ReturnError("Volumes Page", "Error Querying Volumes", err)
+			return messages.ErrorMsg{Locn: "Volumes Page", Title: "Error Querying Volumes", Msg: err.Error()}
 		}
 		return messages.VolumesReadyMsg{Items: vols}
 	})

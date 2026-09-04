@@ -12,7 +12,7 @@ import (
 )
 
 func (s *DockerRuntime) Volumes(ctx context.Context) (*[]types.Volume, error) {
-	dockerVol, err := s.Client.VolumeList(context.Background(), volume.ListOptions{})
+	dockerVol, err := s.Client.VolumeList(ctx, volume.ListOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -34,10 +34,10 @@ func (s *DockerRuntime) Volumes(ctx context.Context) (*[]types.Volume, error) {
 }
 
 func (s *DockerRuntime) PruneVolumes(ctx context.Context) error {
-	_, err := s.Client.VolumesPrune(context.Background(), filters.NewArgs())
+	_, err := s.Client.VolumesPrune(ctx, filters.NewArgs())
 	return err
 }
 
 func (s *DockerRuntime) RemoveVolume(ctx context.Context, id string) error {
-	return s.Client.VolumeRemove(context.Background(), id, false)
+	return s.Client.VolumeRemove(ctx, id, false)
 }

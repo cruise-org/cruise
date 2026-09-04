@@ -33,11 +33,13 @@ func Execute() {
 		os.Exit(1)
 	}
 
-	f, err := tea.LogToFile("debug.log", "")
-	if err != nil {
-		panic(err)
+	if os.Getenv("CRUISE_DEBUG") != "" {
+		f, err := tea.LogToFile("debug.log", "")
+		if err != nil {
+			panic(err)
+		}
+		defer f.Close()
 	}
-	defer f.Close()
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)

@@ -16,6 +16,9 @@ type DiskInfo struct {
 
 func GetDiskInfo() *DiskInfo {
 	usage, err := disk.Usage("/")
+	if err != nil {
+		return &DiskInfo{Err: err}
+	}
 
 	// Convert bytes to GB with 1 decimal point
 	totalGB := float64(usage.Total) / (1 << 30)

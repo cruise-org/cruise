@@ -13,7 +13,7 @@ import (
 )
 
 func (s *DockerRuntime) Images(ctx context.Context) (*[]types.Image, error) {
-	dockerImg, err := s.Client.ImageList(context.Background(), image.ListOptions{All: true})
+	dockerImg, err := s.Client.ImageList(ctx, image.ListOptions{All: true})
 	if err != nil {
 		return nil, err
 	}
@@ -35,27 +35,27 @@ func (s *DockerRuntime) Images(ctx context.Context) (*[]types.Image, error) {
 }
 
 func (s *DockerRuntime) RemoveImage(ctx context.Context, id string) error {
-	_, err := s.Client.ImageRemove(context.Background(), id, image.RemoveOptions{PruneChildren: true, Force: false})
+	_, err := s.Client.ImageRemove(ctx, id, image.RemoveOptions{PruneChildren: true, Force: false})
 	return err
 }
 
 func (s *DockerRuntime) PruneImages(ctx context.Context) error {
-	_, err := s.Client.ImagesPrune(context.Background(), filters.NewArgs())
+	_, err := s.Client.ImagesPrune(ctx, filters.NewArgs())
 	return err
 }
 
 func (s *DockerRuntime) PushImage(ctx context.Context, id string) error {
-	_, err := s.Client.ImagePush(context.Background(), id, image.PushOptions{})
+	_, err := s.Client.ImagePush(ctx, id, image.PushOptions{})
 	return err
 }
 
 func (s *DockerRuntime) PullImage(ctx context.Context, id string) error {
-	_, err := s.Client.ImagePull(context.Background(), id, image.PullOptions{})
+	_, err := s.Client.ImagePull(ctx, id, image.PullOptions{})
 	return err
 }
 
 func (s *DockerRuntime) ImageLayers(ctx context.Context, id string) (string, error) {
-	layers, err := s.Client.ImageHistory(context.Background(), id)
+	layers, err := s.Client.ImageHistory(ctx, id)
 	if err != nil {
 		return "", err
 	}

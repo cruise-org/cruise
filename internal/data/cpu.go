@@ -4,6 +4,7 @@
 package data
 
 import (
+	"errors"
 	"time"
 
 	"github.com/shirou/gopsutil/v3/cpu"
@@ -22,11 +23,17 @@ func GetCPUInfo() *CPUInfo {
 	if err != nil {
 		return &CPUInfo{Error: err}
 	}
+	if len(c) == 0 {
+		return &CPUInfo{Error: errors.New("no cpu info available")}
+	}
 	cp := c[0]
 
 	usage, err := cpu.Percent(time.Second, false) // Overall usage
 	if err != nil {
 		return &CPUInfo{Error: err}
+	}
+	if len(usage) == 0 {
+		return &CPUInfo{Error: errors.New("no cpu usage available")}
 	}
 
 	logical, err := cpu.Counts(true)
@@ -34,7 +41,7 @@ func GetCPUInfo() *CPUInfo {
 		return &CPUInfo{Error: err}
 	}
 
-	physical, err := cpu.Counts(true)
+	physical, err := cpu.Counts(false)
 	if err != nil {
 		return &CPUInfo{Error: err}
 	}

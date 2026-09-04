@@ -1,4 +1,6 @@
 cruise
 debug.log
+bin/
+docker_tui
 # Added by goreleaser init:
 dist/
